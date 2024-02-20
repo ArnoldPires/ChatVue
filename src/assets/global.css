@@ -6,7 +6,12 @@ html {
 }
 
 a {
-  color: #42b983;
+  color: #15cda1;
+  text-decoration: none;
+}
+h1 {
+  color: #15cda1;
+  text-align: center;
 }
 h3 {
   margin: 40px 0 0;
