@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  signInWithEmailAndPassword
 } from "firebase/auth";
 import {
   getFirestore,
@@ -39,16 +40,26 @@ export function useAuth() {
   onUnmounted(unsubscribe);
   const isLogin = computed(() => user.value !== null);
 
-  const signIn = async () => {
+  //Sign in with Google
+    const signInWithGoogle = async () => {
     const googleProvider = new GoogleAuthProvider();
-    await signInWithPopup(auth, googleProvider);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+    }
+  };
+
+  //Sign in with email and password
+    const signInWithEmailAndPasswordMethod = async (email, password) => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signOutUser = () => signOut(auth);
-
-  return { user, isLogin, signIn, signOut: signOutUser };
+  return {user, isLogin, signIn: signInWithEmailAndPasswordMethod, signInWithGoogle, signOut: signOutUser};
 }
 
+// Storing message logs
 const firestore = getFirestore(app);
 const messagesCollection = collection(firestore, "messages");
 const messagesQuery = query(
@@ -66,6 +77,7 @@ export function useChat() {
   });
   onUnmounted(unsubscribe);
 
+  //Grabing Google image icon and name based off of email login
   const { user, isLogin } = useAuth();
   const sendMessage = async (text) => {
     if (!isLogin.value) return;

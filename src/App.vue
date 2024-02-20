@@ -1,9 +1,5 @@
 <template>
-  <nav>
-    <router-link to="/"><h1>UPchieve Chat</h1></router-link>
-  </nav>
   <Nav />
-  <Chat />
   <router-view />
 </template>
 
