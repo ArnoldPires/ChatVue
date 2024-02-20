@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -41,7 +41,7 @@ export function useAuth() {
   const isLogin = computed(() => user.value !== null);
 
   //Sign in with Google
-    const signInWithGoogle = async () => {
+  const signInWithGoogle = async () => {
     const googleProvider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, googleProvider);
@@ -51,12 +51,18 @@ export function useAuth() {
   };
 
   //Sign in with email and password
-    const signInWithEmailAndPasswordMethod = async (email, password) => {
+  const signInWithEmailAndPasswordMethod = async (email, password) => {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signOutUser = () => signOut(auth);
-  return {user, isLogin, signIn: signInWithEmailAndPasswordMethod, signInWithGoogle, signOut: signOutUser};
+  return {
+    user,
+    isLogin,
+    signIn: signInWithEmailAndPasswordMethod,
+    signInWithGoogle,
+    signOut: signOutUser,
+  };
 }
 
 // Storing message logs
@@ -93,3 +99,5 @@ export function useChat() {
 
   return { messages, sendMessage };
 }
+export { auth };
+export { firestore };
