@@ -1,5 +1,22 @@
 <template>
-    <div class="auth-container">
+  <div class="auth-container">
+    <div v-if="isLogin" class="login">
+      <!-- Display the user's photo or a default icon -->
+      <Avatar :src="userPhotoURL" :alt="userName" />
+      <p>{{ userName }}</p>
+      <!-- Sign out button -->
+      <button @click="signOut" class="text-gray-400 hover:text-white">
+        Sign Out
+      </button>
+    </div>
+
+    <div v-else>
+      <!-- Sign in with Google button -->
+      <button @click="signInWithGoogle" class="bg-blue-500 hover:bg-blue-600">
+        Sign In with Google
+      </button>
+
+      <!-- Sign in with email form -->
       <form @submit.prevent="signInWithEmail" class="form-container">
         <div class="card">
           <div class="card-header">
@@ -8,54 +25,77 @@
         </div>
         <div class="card-body">
           <label for="signInEmail">Email</label>
-          <input type="email" id="signInEmail" v-model="email" required placeholder="Enter your email"/>
+          <input
+            type="email"
+            id="signInEmail"
+            v-model="email"
+            required
+            placeholder="Enter your email"
+          />
           <label for="signInPassword">Password</label>
-          <input type="password" id="signInPassword" v-model="password" required placeholder="Enter your password"/>
+          <input
+            type="password"
+            id="signInPassword"
+            v-model="password"
+            required
+            placeholder="Enter your password"
+          />
         </div>
-        <button type="submit" class="bg-green-500 hover:bg-green-600">Sign In with Email</button>
+        <!-- Sign in with email button -->
+        <button type="submit" class="bg-green-500 hover:bg-green-600">
+          Sign In with Email
+        </button>
       </form>
-      <button @click="signInWithGoogle" class="bg-blue-500 hover:bg-blue-600">Sign In with Google</button>
-      <div v-if="isLogin">
-        <Avatar :src="userPhotoURL" :alt="username" />
-        <p>{{ userName }}</p>
-      </div>
-      <div class="register">
-        <p>Don't have an account? Register <RouterLink to="/register" class="nav-link">here.</RouterLink></p>
-      </div>
     </div>
-  </template>
+
+    <div class="register">
+      <p>
+        Don't have an account? Register
+        <RouterLink to="/register" class="nav-link">here.</RouterLink>
+      </p>
+    </div>
+  </div>
+</template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'; // Add computed to the import statement
-import { useRouter } from 'vue-router';
-import { useAuth } from '@/firebase'; // Adjust the path as necessary
-import Avatar from '../components/Avatar.vue'; // Ensure this path is correct
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuth } from "@/firebase";
+import Avatar from "../components/Avatar.vue";
+import defaultIcon from "../../public/icon.png";
 
-// Form inputs
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const router = useRouter();
-
-// Use useAuth from firebase.js
-const { user, signIn: signInWithEmailAndPasswordMethod, signInWithGoogle } = useAuth();
+const {
+  user,
+  isLogin,
+  signOut,
+  signIn: signInWithEmailAndPasswordMethod,
+  signInWithGoogle,
+} = useAuth();
 
 const signInWithEmail = async () => {
-    try {
-        await signInWithEmailAndPasswordMethod(email.value, password.value);
-        console.log('Successfully signed in');
-        router.push('/');
-    } catch (error) {
-        console.error('Sign-in error:', error);
-        alert(error.message);
-    }
+  try {
+    await signInWithEmailAndPasswordMethod(email.value, password.value);
+    console.log("Successfully signed in");
+    router.push("/");
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    console.error("Sign-in error:", errorMessage);
+    alert(errorMessage);
+  }
 };
 
-// Computed properties for user's photo URL and name
 const userPhotoURL = computed(() => {
-  // Use a default icon if the email isn't Gmail or if the user doesn't have a photoURL
-  const defaultIcon = '../assets/icon.png'; // Update this path to the correct location of your default icon
-  return user.value?.photoURL || (user.value?.email?.endsWith('@gmail.com') ? user.value.photoURL : defaultIcon);
+  // Cast user.value to any to bypass TypeScript checks
+  const userValue: any = user.value;
+  return userValue?.photoURL || defaultIcon;
 });
 
-const userName = computed(() => user.value?.displayName || 'Default User Name');
+const userName = computed(() => {
+  const userValue: any = user.value;
+  return userValue?.displayName || "Default User Name";
+});
 </script>
