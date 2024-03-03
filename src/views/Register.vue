@@ -36,6 +36,12 @@
   <button @click="handleGoogleSignIn" class="bg-blue-500 hover:bg-blue-600">
     Register with Google
   </button>
+  <div class="signIn">
+    <p>
+      Already have an account? Login
+      <RouterLink to="/" class="nav-link">here.</RouterLink>
+    </p>
+  </div>
 </template>
 
 <script setup>
