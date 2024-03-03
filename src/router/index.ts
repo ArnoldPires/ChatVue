@@ -5,6 +5,11 @@ const router = createRouter({
   routes: [
     { path: "/", component: () => import("../views/SignIn.vue") },
     { path: "/register", component: () => import("../views/Register.vue") },
+    {
+      path: "/dashboard",
+      // Make sure this path correctly points to where Dashboard.vue is located
+      component: () => import("../views/Dashboard.vue"),
+    },
   ],
 });
 
