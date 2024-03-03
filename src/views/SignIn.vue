@@ -41,7 +41,10 @@
         </button>
       </form>
       <!-- Sign in with Google button -->
-      <button @click="handleSignInWithGoogle" class="bg-blue-500 hover:bg-blue-600">
+      <button
+        @click="handleSignInWithGoogle"
+        class="bg-blue-500 hover:bg-blue-600"
+      >
         Sign In with Google
       </button>
     </div>
@@ -55,45 +58,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuth } from '@/firebase'; // Adjust the path as necessary
-import Avatar from '../components/Avatar.vue'; // Ensure this path is correct
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuth } from "@/firebase"; // Adjust the path as necessary
+import Avatar from "../components/Avatar.vue"; // Ensure this path is correct
 
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
 const router = useRouter();
 
 // Use useAuth from firebase.js
-const { user, signIn: signInWithEmailAndPasswordMethod, signInWithGoogle, signOut, isLogin } = useAuth();
+const {
+  user,
+  username,
+  signIn: signInWithEmailAndPasswordMethod,
+  signInWithGoogle,
+  signOut,
+  isLogin,
+} = useAuth();
 
 const signInWithEmail = async () => {
-    try {
-        await signInWithEmailAndPasswordMethod(email.value, password.value);
-        console.log('Successfully signed in');
-        router.push('/');
-    } catch (error) {
-        console.error('Sign-in error:', error);
-        alert(error.message);
-    }
+  try {
+    await signInWithEmailAndPasswordMethod(email.value, password.value);
+    console.log("Successfully signed in");
+    router.push("/");
+  } catch (error) {
+    console.error("Sign-in error:", error);
+    alert(error.message);
+  }
 };
 
 // This function handles Google sign-in
 const handleSignInWithGoogle = async () => {
-    try {
-        await signInWithGoogle();
-        console.log('Successfully signed in with Google');
-        router.push('/');
-    } catch (error) {
-        console.error('Google sign-in error:', error);
-        alert(error.message);
-    }
+  try {
+    await signInWithGoogle();
+    console.log("Successfully signed in with Google");
+    router.push("/");
+  } catch (error) {
+    console.error("Google sign-in error:", error);
+    alert(error.message);
+  }
 };
-const defaultIcon = '/icon.png';
+const defaultIcon = "/icon.png";
 // Computed properties for user's photo URL and name
-const userPhotoURL = computed(() => { 
+const userPhotoURL = computed(() => {
   return user.value?.photoURL || defaultIcon;
 });
 
-const userName = computed(() => user.value?.displayName || 'Default User Name');
+const userName = computed(() => username.value || "Default User Name");
 </script>

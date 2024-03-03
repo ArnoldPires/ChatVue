@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import {
   getFirestore,
+  doc,
   collection,
   query,
   orderBy,
@@ -33,12 +34,30 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const firestore = getFirestore(app);
 
 export function useAuth() {
   const user = ref(null);
-  const unsubscribe = onAuthStateChanged(auth, (_user) => (user.value = _user));
-  onUnmounted(unsubscribe);
-  const isLogin = computed(() => user.value !== null);
+  const username = ref("");
+
+  // Get the userName of user
+  const fetchUsername = (uid) => {
+    const docRef = doc(firestore, "users", uid);
+    onSnapshot(docRef, (doc) => {
+      username.value = doc.data()?.username;
+    });
+  };
+
+  // If the user is logged in, fetch their username
+  onAuthStateChanged(auth, (_user) => {
+    if (_user) {
+      user.value = _user;
+      fetchUsername(_user.uid);
+    } else {
+      user.value = null;
+      username.value = "";
+    }
+  });
 
   //Sign in with Google
   const signInWithGoogle = async () => {
@@ -55,49 +74,48 @@ export function useAuth() {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signOutUser = () => signOut(auth);
+  const signOutUser = () => {
+    username.value = "";
+    signOut(auth);
+  };
+
   return {
     user,
-    isLogin,
+    username,
+    isLogin: computed(() => user.value !== null),
     signIn: signInWithEmailAndPasswordMethod,
     signInWithGoogle,
     signOut: signOutUser,
   };
 }
 
-// Storing message logs
-const firestore = getFirestore(app);
-const messagesCollection = collection(firestore, "messages");
-const messagesQuery = query(
-  messagesCollection,
-  orderBy("createdAt", "desc"),
-  limit(100)
-);
-
+// Handling the messages...storing them
 export function useChat() {
   const messages = ref([]);
-  const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+  const messagesCollection = collection(firestore, "messages");
+  const messagesQuery = query(
+    messagesCollection,
+    orderBy("createdAt", "desc"),
+    limit(100)
+  );
+
+  onSnapshot(messagesQuery, (snapshot) => {
     messages.value = snapshot.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .reverse();
   });
-  onUnmounted(unsubscribe);
-
-  //Grabing Google image icon and name based off of email login
-  const { user, isLogin } = useAuth();
   const sendMessage = async (text) => {
-    if (!isLogin.value) return;
+    if (!user.value) return;
     const { photoURL, uid, displayName } = user.value;
     await addDoc(messagesCollection, {
-      userName: displayName,
+      userName: displayName || username.value,
       userId: uid,
       userPhotoURL: photoURL,
       text: text,
       createdAt: serverTimestamp(),
     });
   };
-
   return { messages, sendMessage };
 }
-export { auth };
-export { firestore };
+
+export { auth, firestore };
