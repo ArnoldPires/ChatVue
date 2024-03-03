@@ -76,7 +76,7 @@ const register = async () => {
     );
     console.log("Successfully registered!");
     await saveUsername(userCredential.user.uid, username.value); // Save the username in Firestore
-    router.push("/");
+    router.push("/dashboard");
   } catch (error) {
     console.error("Registration error:", error);
     alert(error.message);
@@ -91,7 +91,7 @@ const handleGoogleSignIn = async () => {
     const user = result.user;
     // Check if username exists, if not, save the Google name as the username
     await saveUsername(user.uid, user.displayName || "Google User");
-    router.push("/");
+    router.push("/dashboard");
   } catch (error) {
     console.error("Google Sign-in error:", error);
     alert(error.message);

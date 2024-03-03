@@ -60,8 +60,8 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useAuth } from "@/firebase"; // Adjust the path as necessary
-import Avatar from "../components/Avatar.vue"; // Ensure this path is correct
+import { useAuth } from "@/firebase";
+import Avatar from "../components/Avatar.vue";
 
 const email = ref("");
 const password = ref("");
@@ -81,7 +81,7 @@ const signInWithEmail = async () => {
   try {
     await signInWithEmailAndPasswordMethod(email.value, password.value);
     console.log("Successfully signed in");
-    router.push("/");
+    router.push("/dashboard");
   } catch (error) {
     console.error("Sign-in error:", error);
     alert(error.message);
@@ -93,7 +93,7 @@ const handleSignInWithGoogle = async () => {
   try {
     await signInWithGoogle();
     console.log("Successfully signed in with Google");
-    router.push("/");
+    router.push("/dashboard");
   } catch (error) {
     console.error("Google sign-in error:", error);
     alert(error.message);
