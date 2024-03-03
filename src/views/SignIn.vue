@@ -2,8 +2,8 @@
   <div class="auth-container">
     <div v-if="isLogin" class="login">
       <!-- Display the user's photo or a default icon, and the username or "Welcome" message -->
-      <Avatar :src="userPhotoURL" :alt="username" />
-      <p>Welcome, {{ username }}</p>
+      <Avatar :src="userPhotoURL" :alt="userName" />
+      <p>Welcome, {{ userName }}</p>
       <!-- Sign out button -->
       <button @click="signOut" class="text-gray-400 hover:text-white">
         Sign Out
@@ -41,7 +41,7 @@
         </button>
       </form>
       <!-- Sign in with Google button -->
-      <button @click="signInWithGoogle" class="bg-blue-500 hover:bg-blue-600">
+      <button @click="handleSignInWithGoogle" class="bg-blue-500 hover:bg-blue-600">
         Sign In with Google
       </button>
     </div>
@@ -54,65 +54,46 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useAuth, firestore } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import Avatar from "../components/Avatar.vue";
-import defaultIcon from "../../public/icon.png";
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuth } from '@/firebase'; // Adjust the path as necessary
+import Avatar from '../components/Avatar.vue'; // Ensure this path is correct
 
-const email = ref("");
-const password = ref("");
+const email = ref('');
+const password = ref('');
 const router = useRouter();
-const {
-  user,
-  isLogin,
-  signIn: signInWithEmailAndPasswordMethod,
-  signInWithGoogle,
-  signOut,
-} = useAuth();
 
-const username = ref("Default User Name"); // New ref for username
-
-// Fetch username from Firestore
-async function fetchUsername() {
-  if (user.value) {
-    const userDocRef = doc(firestore, "users", user.value.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      username.value = userDoc.data().username; // Set the fetched username
-    } else {
-      console.log("No username found in Firestore.");
-    }
-  }
-}
-
-// Fetch the username once the user is confirmed to be logged in
-onMounted(async () => {
-  if (isLogin.value) {
-    await fetchUsername();
-  }
-});
+// Use useAuth from firebase.js
+const { user, signIn: signInWithEmailAndPasswordMethod, signInWithGoogle, signOut, isLogin } = useAuth();
 
 const signInWithEmail = async () => {
-  try {
-    await signInWithEmailAndPasswordMethod(email.value, password.value);
-    await fetchUsername(); // Fetch username after successful sign-in
-    console.log("Successfully signed in");
-    router.push("/");
-  } catch (error) {
-    console.error("Sign-in error:", error);
-    alert(error.message);
-  }
+    try {
+        await signInWithEmailAndPasswordMethod(email.value, password.value);
+        console.log('Successfully signed in');
+        router.push('/');
+    } catch (error) {
+        console.error('Sign-in error:', error);
+        alert(error.message);
+    }
 };
 
-const userPhotoURL = ref(defaultIcon); // Initialize with default icon
-
-// Update userPhotoURL if user is logged in
-onMounted(() => {
-  if (user.value?.photoURL) {
-    userPhotoURL.value = user.value.photoURL;
-  }
+// This function handles Google sign-in
+const handleSignInWithGoogle = async () => {
+    try {
+        await signInWithGoogle();
+        console.log('Successfully signed in with Google');
+        router.push('/');
+    } catch (error) {
+        console.error('Google sign-in error:', error);
+        alert(error.message);
+    }
+};
+const defaultIcon = '/icon.png';
+// Computed properties for user's photo URL and name
+const userPhotoURL = computed(() => { 
+  return user.value?.photoURL || defaultIcon;
 });
+
+const userName = computed(() => user.value?.displayName || 'Default User Name');
 </script>
