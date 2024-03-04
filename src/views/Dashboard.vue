@@ -1,11 +1,21 @@
 <template>
   <div class="dashboard-container">
-    <p>Dashboard</p>
-    <Avatar :src="userPhotoURL" :alt="userName" />
-    <p>Welcome, {{ userName }}</p>
-    <button @click="signOut" class="text-gray-400 hover:text-white">
-      Sign Out
-    </button>
+    <div class="dashboard-header">
+      <Avatar :src="userPhotoURL" :alt="userName" class="user-avatar" />
+      <h1>Welcome, {{ userName }}</h1>
+      <button @click="signOut" class="sign-out-btn">Sign Out</button>
+    </div>
+    <div class="rooms-container">
+      <h2>Select a Room</h2>
+      <div class="rooms">
+        <div v-for="room in rooms" :key="room.name" class="room">
+          <h3>{{ room.name }}</h3>
+          <button @click="goToChat(room.name)" class="enter-room-btn">
+            Enter Room
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,16 +28,25 @@ import Avatar from "../components/Avatar.vue";
 const { user, username, signOut: signOutUser } = useAuth();
 const router = useRouter();
 
+const rooms = [
+  { name: "Math" },
+  { name: "English" },
+  { name: "Science" },
+  { name: "College Counseling" },
+  { name: "Social Studies" },
+  { name: "SAT & ACT Prep" },
+];
+
 const defaultIcon = "/icon.png";
 const userPhotoURL = computed(() => user.value?.photoURL || defaultIcon);
 const userName = computed(() => username.value || "Default User Name");
 
 const signOut = async () => {
-  signOutUser();
+  await signOutUser();
   router.push("/");
 };
 
-if (!user.value) {
-  router.push("/");
-}
+const goToChat = (roomName) => {
+  router.push({ name: "Chat", query: { room: roomName } });
+};
 </script>

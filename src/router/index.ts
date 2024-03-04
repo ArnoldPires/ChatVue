@@ -1,14 +1,28 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: "/", component: () => import("../views/SignIn.vue") },
-    { path: "/register", component: () => import("../views/Register.vue") },
+    {
+      path: "/",
+      name: "SignIn",
+      component: () => import("../views/SignIn.vue"),
+    },
+    {
+      path: "/register",
+      name: "Register",
+      component: () => import("../views/Register.vue"),
+    },
     {
       path: "/dashboard",
-      // Make sure this path correctly points to where Dashboard.vue is located
+      name: "Dashboard",
       component: () => import("../views/Dashboard.vue"),
+    },
+    {
+      path: "/chat",
+      name: "Chat",
+      component: () => import("../views/Chat.vue"),
     },
   ],
 });
